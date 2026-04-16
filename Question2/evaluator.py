@@ -76,3 +76,14 @@ def parse_primary(tokens, pos):
         return node, pos + 1
 
     raise ValueError(f"Unexpected token: {token_value}")
+
+
+def parse_expression(tokens, pos):
+    left, pos = parse_term(tokens, pos)
+
+    while tokens[pos][0] == 'OP' and tokens[pos][1] in '+-':
+        op = tokens[pos][1]
+        right, pos = parse_term(tokens, pos + 1)
+        left = (op, left, right)
+
+    return left, pos
