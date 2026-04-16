@@ -1,168 +1,74 @@
-def tokenize(expression):
-    tokens = []
-    i = 0
-    while i < len(expression):
-        char = expression[i]
+# This is the main file that ties everything together
+# It reads expressions from an input file line by line
+# Then uses the tokenizer, parser and evaluator to process each one
+# Finally it writes all results to output.txt in the required format
 
-        # skip the spaces
-        if char == ' ':
-            i += 1
-            continue
+from tokenizer import tokenize, format_tokens
+from expression_parser import parse_expression
+from evaluator_core import evaluate, format_tree
 
-        # if number 
-        if char.isdigit():
-            num = ''
-            while i < len(expression) and expression[i].isdigit():
-                num += expression[i]
-                i += 1
-            tokens.append(('NUM', int(num)))
-            continue
-
-        # if operator
-        if char in '+-*/':
-            tokens.append(('OP', char))
-            i += 1
-            continue
-
-        # if left parenthesis
-        if char == '(':
-            tokens.append(('LPAREN', '('))
-            i += 1
-            continue
-
-        # if right parenthesis
-        if char == ')':
-            tokens.append(('RPAREN', ')'))
-            i += 1
-            continue
-
-        # if error
-        return None
-
-    # Add END token 
-    tokens.append(('END', 'END'))
-    return tokens
-
-
-def format_tokens(tokens):
-    result = ''
-    for token_type, token_value in tokens:
-        if token_type == 'END':
-            result += '[END]'
-        else:
-            result += f'[{token_type}:{token_value}] '
-    return result.strip()
-
-
-def parse_primary(tokens, pos):
-    token_type, token_value = tokens[pos]
-
-    # if number
-    if token_type == 'NUM':
-        node = ('num', token_value)
-        return node, pos + 1
-
-    # if unary negation
-    if token_type == 'OP' and token_value == '-':
-        operand, pos = parse_primary(tokens, pos + 1)
-        node = ('neg', operand)
-        return node, pos
-
-    # Iif left parenthesis
-    if token_type == 'LPAREN':
-        node, pos = parse_expression(tokens, pos + 1)
-        if tokens[pos][0] != 'RPAREN':
-            raise ValueError("Expected closing parenthesis")
-        return node, pos + 1
-
-    raise ValueError(f"Unexpected token: {token_value}")
-
-
-def parse_expression(tokens, pos):
-    left, pos = parse_term(tokens, pos)
-
-    while tokens[pos][0] == 'OP' and tokens[pos][1] in '+-':
-        op = tokens[pos][1]
-        right, pos = parse_term(tokens, pos + 1)
-        left = (op, left, right)
-
-    return left, pos
-
-
-
-
-def evaluate(node):
-    if node[0] == 'num':
-        return node[1]
-
-    if node[0] == 'neg':
-        return -evaluate(node[1])
-
-    if node[0] == '+':
-        return evaluate(node[1]) + evaluate(node[2])
-
-    if node[0] == '-':
-        return evaluate(node[1]) - evaluate(node[2])
-
-    if node[0] == '*':
-        return evaluate(node[1]) * evaluate(node[2])
-
-    if node[0] == '/':
-        right = evaluate(node[2])
-        if right == 0:
-            raise ZeroDivisionError("Division by zero")
-        return evaluate(node[1]) / right
-    
-def format_tree(node):
-    if node[0] == 'num':
-        return str(node[1])
-    if node[0] == 'neg':
-        return f'(neg {format_tree(node[1])})'
-    return f'({node[0]} {format_tree(node[1])} {format_tree(node[2])})'
 
 def evaluate_file(input_path: str) -> list[dict]:
     import os
+
+    # Build the output path in the same folder as input
     output_path = os.path.join(os.path.dirname(input_path), 'output.txt')
     results = []
 
+    # Read all non-empty lines from the input file
     with open(input_path, 'r') as f:
         lines = [line.strip() for line in f if line.strip()]
 
     with open(output_path, 'w') as out:
         for i, line in enumerate(lines):
+
+            # Step 1 - tokenize the expression
             tokens = tokenize(line)
 
             if tokens is None:
+                # Unknown character found
                 tree_str = 'ERROR'
                 tokens_str = 'ERROR'
                 result_str = 'ERROR'
                 result_val = 'ERROR'
             else:
                 try:
+                    # Step 2 - parse tokens into a tree
                     tree, _ = parse_expression(tokens, 0)
                     tree_str = format_tree(tree)
                     tokens_str = format_tokens(tokens)
+
+                    # Step 3 - evaluate the tree
                     result = evaluate(tree)
+
+                    # Display whole numbers without decimal point
                     if result == int(result):
                         result_str = str(int(result))
                     else:
                         result_str = str(round(result, 4))
                     result_val = float(result)
+
                 except ZeroDivisionError:
+                    # Tree is still valid but result is error
                     tree_str = format_tree(tree)
                     tokens_str = format_tokens(tokens)
                     result_str = 'ERROR'
                     result_val = 'ERROR'
-                except:
+
+                except Exception:
+                    # Any other error like unary + or bad syntax
                     tree_str = 'ERROR'
                     tokens_str = 'ERROR'
                     result_str = 'ERROR'
                     result_val = 'ERROR'
 
+            # Write the four lines for this expression
             out.write(f'Input: {line}\n')
             out.write(f'Tree: {tree_str}\n')
             out.write(f'Tokens: {tokens_str}\n')
             out.write(f'Result: {result_str}\n')
+
+            # Add blank line between expressions
             if i < len(lines) - 1:
                 out.write('\n')
 
@@ -174,8 +80,6 @@ def evaluate_file(input_path: str) -> list[dict]:
             })
 
     return results
-
-
 
 
 if __name__ == '__main__':
