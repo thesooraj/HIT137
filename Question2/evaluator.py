@@ -87,3 +87,28 @@ def parse_expression(tokens, pos):
         left = (op, left, right)
 
     return left, pos
+
+
+
+
+def evaluate(node):
+    if node[0] == 'num':
+        return node[1]
+
+    if node[0] == 'neg':
+        return -evaluate(node[1])
+
+    if node[0] == '+':
+        return evaluate(node[1]) + evaluate(node[2])
+
+    if node[0] == '-':
+        return evaluate(node[1]) - evaluate(node[2])
+
+    if node[0] == '*':
+        return evaluate(node[1]) * evaluate(node[2])
+
+    if node[0] == '/':
+        right = evaluate(node[2])
+        if right == 0:
+            raise ZeroDivisionError("Division by zero")
+        return evaluate(node[1]) / right
