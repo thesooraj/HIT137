@@ -113,16 +113,12 @@ def evaluate(node):
             raise ZeroDivisionError("Division by zero")
         return evaluate(node[1]) / right
     
-
-
-
-    def format_tree(node):
+def format_tree(node):
     if node[0] == 'num':
         return str(node[1])
     if node[0] == 'neg':
         return f'(neg {format_tree(node[1])})'
     return f'({node[0]} {format_tree(node[1])} {format_tree(node[2])})'
-
 
 def evaluate_file(input_path: str) -> list[dict]:
     import os
@@ -178,3 +174,11 @@ def evaluate_file(input_path: str) -> list[dict]:
             })
 
     return results
+
+
+
+
+if __name__ == '__main__':
+    results = evaluate_file('sample_input.txt')
+    for r in results:
+        print(r)
