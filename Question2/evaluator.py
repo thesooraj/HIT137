@@ -112,3 +112,69 @@ def evaluate(node):
         if right == 0:
             raise ZeroDivisionError("Division by zero")
         return evaluate(node[1]) / right
+    
+
+
+
+    def format_tree(node):
+    if node[0] == 'num':
+        return str(node[1])
+    if node[0] == 'neg':
+        return f'(neg {format_tree(node[1])})'
+    return f'({node[0]} {format_tree(node[1])} {format_tree(node[2])})'
+
+
+def evaluate_file(input_path: str) -> list[dict]:
+    import os
+    output_path = os.path.join(os.path.dirname(input_path), 'output.txt')
+    results = []
+
+    with open(input_path, 'r') as f:
+        lines = [line.strip() for line in f if line.strip()]
+
+    with open(output_path, 'w') as out:
+        for i, line in enumerate(lines):
+            tokens = tokenize(line)
+
+            if tokens is None:
+                tree_str = 'ERROR'
+                tokens_str = 'ERROR'
+                result_str = 'ERROR'
+                result_val = 'ERROR'
+            else:
+                try:
+                    tree, _ = parse_expression(tokens, 0)
+                    tree_str = format_tree(tree)
+                    tokens_str = format_tokens(tokens)
+                    result = evaluate(tree)
+                    if result == int(result):
+                        result_str = str(int(result))
+                    else:
+                        result_str = str(round(result, 4))
+                    result_val = float(result)
+                except ZeroDivisionError:
+                    tree_str = format_tree(tree)
+                    tokens_str = format_tokens(tokens)
+                    result_str = 'ERROR'
+                    result_val = 'ERROR'
+                except:
+                    tree_str = 'ERROR'
+                    tokens_str = 'ERROR'
+                    result_str = 'ERROR'
+                    result_val = 'ERROR'
+
+            out.write(f'Input: {line}\n')
+            out.write(f'Tree: {tree_str}\n')
+            out.write(f'Tokens: {tokens_str}\n')
+            out.write(f'Result: {result_str}\n')
+            if i < len(lines) - 1:
+                out.write('\n')
+
+            results.append({
+                'input': line,
+                'tree': tree_str,
+                'tokens': tokens_str,
+                'result': result_val
+            })
+
+    return results
