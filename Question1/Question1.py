@@ -61,21 +61,27 @@ def decrypt_file(shift1, shift2):
     for c in text:
         # lowercase
         if 'a' <= c <= 'z':
-            if c <= 'm':
-                shift = shift1 * shift2
-                decrypted += shift_backward(c, shift)
+            pos = ord(c) - ord('a')
+            shift = shift1 * shift2
+            original = (pos - shift) % 26
+            if 0 <= original <= 12:
+                decrypted += chr(original + ord('a'))
             else:
                 shift = shift1 + shift2
-                decrypted += shift_forward(c, shift)
+                original = (pos + shift) % 26
+                decrypted += chr(original + ord('a'))
 
         # uppercase
         elif 'A' <= c <= 'Z':
-            if c <= 'M':
-                shift = shift1
-                decrypted += shift_forward_upper(c, shift)
+            pos = ord(c) - ord('A')
+            shift = shift1
+            original = (pos + shift) % 26
+            if 0 <= original <= 12:
+                decrypted += chr(original + ord('A'))
             else:
                 shift = shift2 ** 2
-                decrypted += shift_backward_upper(c, shift)
+                original = (pos - shift) % 26
+                decrypted += chr(original + ord('A'))
 
         # others unchanged
         else:
