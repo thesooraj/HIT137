@@ -20,32 +20,22 @@ def shift_backward_upper(c, shift):
 def encrypt_file(shift1, shift2):
     with open("raw_text.txt", "r") as f:
         text = f.read()
-
     encrypted = ""
-
     for c in text:
-        # lowercase
         if 'a' <= c <= 'z':
-            if c <= 'm':
-                shift = shift1 * shift2
-                encrypted += shift_forward(c, shift)
+            p = ord(c) - 97
+            if p <= 12:
+                encrypted += chr((p + shift1 * shift2) % 13 + 97)
             else:
-                shift = shift1 + shift2
-                encrypted += shift_backward(c, shift)
-
-        # uppercase
+                encrypted += chr((p - (shift1 + shift2)) % 13 + 110)
         elif 'A' <= c <= 'Z':
-            if c <= 'M':
-                shift = shift1
-                encrypted += shift_backward_upper(c, shift)
+            p = ord(c) - 65
+            if p <= 12:
+                encrypted += chr((p - shift1) % 13 + 65)
             else:
-                shift = shift2 ** 2
-                encrypted += shift_forward_upper(c, shift)
-
-        # others unchanged
+                encrypted += chr((p + shift2 ** 2) % 13 + 78)
         else:
             encrypted += c
-
     with open("encrypted_text.txt", "w") as f:
         f.write(encrypted)
 
@@ -55,38 +45,22 @@ def encrypt_file(shift1, shift2):
 def decrypt_file(shift1, shift2):
     with open("encrypted_text.txt", "r") as f:
         text = f.read()
-
     decrypted = ""
-
     for c in text:
-        # lowercase
         if 'a' <= c <= 'z':
-            pos = ord(c) - ord('a')
-            shift = shift1 * shift2
-            original = (pos - shift) % 26
-            if 0 <= original <= 12:
-                decrypted += chr(original + ord('a'))
+            p = ord(c) - 97
+            if p <= 12:
+                decrypted += chr((p - shift1 * shift2) % 13 + 97)
             else:
-                shift = shift1 + shift2
-                original = (pos + shift) % 26
-                decrypted += chr(original + ord('a'))
-
-        # uppercase
+                decrypted += chr((p + (shift1 + shift2)) % 13 + 110)
         elif 'A' <= c <= 'Z':
-            pos = ord(c) - ord('A')
-            shift = shift1
-            original = (pos + shift) % 26
-            if 0 <= original <= 12:
-                decrypted += chr(original + ord('A'))
+            p = ord(c) - 65
+            if p <= 12:
+                decrypted += chr((p + shift1) % 13 + 65)
             else:
-                shift = shift2 ** 2
-                original = (pos - shift) % 26
-                decrypted += chr(original + ord('A'))
-
-        # others unchanged
+                decrypted += chr((p - shift2 ** 2) % 13 + 78)
         else:
             decrypted += c
-
     with open("decrypted_text.txt", "w") as f:
         f.write(decrypted)
 
