@@ -20,24 +20,31 @@ def shift_backward_upper(c, shift):
 def encrypt_file(shift1, shift2):
     with open("raw_text.txt", "r") as f:
         text = f.read()
+    
     encrypted = ""
     for c in text:
         if 'a' <= c <= 'z':
             p = ord(c) - 97
             if p <= 12:
-                encrypted += chr((p + shift1 * shift2) % 13 + 97)
+                # First half a-m: shift forward by shift1 * shift2
+                encrypted += shift_forward(c, (shift1 * shift2) % 13)
             else:
+                # Second half n-z: shift backward by shift1 + shift2
                 encrypted += chr((p - (shift1 + shift2)) % 13 + 110)
         elif 'A' <= c <= 'Z':
             p = ord(c) - 65
             if p <= 12:
-                encrypted += chr((p - shift1) % 13 + 65)
+                # First half A-M: shift backward by shift1
+                encrypted += shift_backward_upper(c, shift1 % 13)
             else:
+                # Second half N-Z: shift forward by shift2 squared
                 encrypted += chr((p + shift2 ** 2) % 13 + 78)
         else:
             encrypted += c
+    
     with open("encrypted_text.txt", "w") as f:
         f.write(encrypted)
+    print("Encryption completed → encrypted_text.txt")
 
 
 # ---------------- DECRYPTION ---------------- #
@@ -45,24 +52,32 @@ def encrypt_file(shift1, shift2):
 def decrypt_file(shift1, shift2):
     with open("encrypted_text.txt", "r") as f:
         text = f.read()
+    
     decrypted = ""
     for c in text:
         if 'a' <= c <= 'z':
             p = ord(c) - 97
             if p <= 12:
-                decrypted += chr((p - shift1 * shift2) % 13 + 97)
+                # Reverse first half: shift backward by shift1 * shift2
+                decrypted += shift_backward(c, (shift1 * shift2) % 13)
             else:
+                # Reverse second half: shift forward by shift1 + shift2
                 decrypted += chr((p + (shift1 + shift2)) % 13 + 110)
         elif 'A' <= c <= 'Z':
             p = ord(c) - 65
             if p <= 12:
-                decrypted += chr((p + shift1) % 13 + 65)
+                # Reverse first half: shift forward by shift1
+                decrypted += shift_forward_upper(c, shift1 % 13)
             else:
+                # Reverse second half: shift backward by shift2 squared
                 decrypted += chr((p - shift2 ** 2) % 13 + 78)
         else:
             decrypted += c
+    
     with open("decrypted_text.txt", "w") as f:
         f.write(decrypted)
+    print("Decryption completed → decrypted_text.txt")
+
 
 
 # ---------------- VERIFICATION ---------------- #
