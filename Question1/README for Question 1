@@ -1,0 +1,41 @@
+# Question 1 - Text Encryption and Decryption
+
+## What this program does
+This program reads a text file called raw_text.txt, encrypts it using
+a custom encryption method, then decrypts it and verifies the result
+matches the original.
+
+## How to Run
+Open terminal in this folder and type:
+
+    python3 Question1.py
+
+When prompted enter two shift values for example 2 and 3.
+
+## Encryption Rules
+
+### Lowercase letters
+- Letters a to m are shifted forward by shift1 multiplied by shift2
+- Letters n to z are shifted backward by shift1 plus shift2
+
+### Uppercase letters
+- Letters A to M are shifted backward by shift1
+- Letters N to Z are shifted forward by shift2 squared
+
+### Other characters
+- Spaces, numbers, and symbols stay unchanged
+
+## Files
+- raw_text.txt — original input text
+- encrypted_text.txt — generated after encryption
+- decrypted_text.txt — generated after decryption
+
+## Helper Functions
+- shift_forward — shifts a lowercase letter forward
+- shift_backward — shifts a lowercase letter backward
+- shift_forward_upper — shifts an uppercase letter forward
+- shift_backward_upper — shifts an uppercase letter backward
+
+## Verification
+After decryption the program automatically checks if the decrypted
+text matches the original and prints the result.
